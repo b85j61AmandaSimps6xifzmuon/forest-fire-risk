@@ -125,10 +125,11 @@ const App: React.FC = () => {
               list.push({
                 id: key,
                 region: recordData.region,
-                riskLevel: recordData.riskLevel,
-                latitude: recordData.latitude,
-                longitude: recordData.longitude,
-                timestamp: recordData.timestamp,
+                // 确保数值类型转换
+                riskLevel: Number(recordData.riskLevel),
+                latitude: Number(recordData.latitude),
+                longitude: Number(recordData.longitude),
+                timestamp: Number(recordData.timestamp),
                 encryptedData: recordData.encryptedData
               });
             } catch (e) {
@@ -360,7 +361,10 @@ const App: React.FC = () => {
           <div className="map-popup">
             <h3>{selectedRecord.region}</h3>
             <p>Risk Level: {selectedRecord.riskLevel}</p>
-            <p>Coordinates: {selectedRecord.latitude.toFixed(4)}, {selectedRecord.longitude.toFixed(4)}</p>
+            <p>Coordinates: 
+              {typeof selectedRecord.latitude === 'number' ? selectedRecord.latitude.toFixed(4) : 'N/A'}, 
+              {typeof selectedRecord.longitude === 'number' ? selectedRecord.longitude.toFixed(4) : 'N/A'}
+            </p>
             <button className="close-popup" onClick={() => setSelectedRecord(null)}>
               Close
             </button>
@@ -643,7 +647,8 @@ const App: React.FC = () => {
                         {renderRiskLevel(record.riskLevel)}
                       </div>
                       <div className="table-cell">
-                        {record.latitude.toFixed(4)}, {record.longitude.toFixed(4)}
+                        {typeof record.latitude === 'number' ? record.latitude.toFixed(4) : 'N/A'}, 
+                        {typeof record.longitude === 'number' ? record.longitude.toFixed(4) : 'N/A'}
                       </div>
                       <div className="table-cell">
                         {new Date(record.timestamp * 1000).toLocaleDateString()}
@@ -742,9 +747,15 @@ const ModalCreate: React.FC<ModalCreateProps> = ({
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
+    const parsedValue = 
+      name === 'riskLevel' ? parseInt(value, 10) :
+      name === 'latitude' || name === 'longitude' ? parseFloat(value) :
+      value;
+      
     setRecordData({
       ...recordData,
-      [name]: value
+      [name]: parsedValue
     });
   };
 
